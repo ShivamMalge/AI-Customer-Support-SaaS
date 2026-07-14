@@ -20,7 +20,7 @@ import { useUIStore } from '@/stores/ui-store';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -47,7 +47,7 @@ export default function DashboardLayout({
     router.push('/login');
   };
 
-  const NavLinks = () => (
+  const navLinksContent = (
     <nav className="space-y-1 p-4">
       {navItems.map((item) => {
         const Icon = item.icon;
@@ -81,7 +81,7 @@ export default function DashboardLayout({
         </div>
         <div className="flex-1 overflow-y-auto">
           {sidebarOpen ? (
-            <NavLinks />
+            {navLinksContent}
           ) : (
             <nav className="flex flex-col items-center space-y-4 py-6">
               {navItems.map((item) => (
@@ -108,7 +108,7 @@ export default function DashboardLayout({
                   <Bot className="h-8 w-8 text-indigo-500" />
                   <span className="ml-3 text-lg font-bold tracking-tight">SupportGPT</span>
                 </div>
-                <NavLinks />
+                {navLinksContent}
               </SheetContent>
             </Sheet>
 

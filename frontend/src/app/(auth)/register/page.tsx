@@ -49,7 +49,8 @@ export default function RegisterPage() {
       setAuth(response.data.user, response.data.access_token);
       toast.success('Account created successfully!');
       router.push('/dashboard');
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: { message?: string } } } };
       toast.error(error.response?.data?.error?.message || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
@@ -142,3 +143,4 @@ export default function RegisterPage() {
     </Card>
   );
 }
+

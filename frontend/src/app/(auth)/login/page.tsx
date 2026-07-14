@@ -43,7 +43,8 @@ export default function LoginPage() {
       setAuth(response.data.user, response.data.access_token);
       toast.success('Welcome back!');
       router.push('/dashboard');
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: { message?: string } } } };
       toast.error(error.response?.data?.error?.message || 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
@@ -112,7 +113,7 @@ export default function LoginPage() {
       </CardContent>
       <CardFooter className="flex justify-center border-t border-white/5 pt-6">
         <p className="text-sm text-muted-foreground">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/register" className="font-medium text-indigo-400 hover:text-indigo-300">
             Sign up
           </Link>
@@ -121,3 +122,4 @@ export default function LoginPage() {
     </Card>
   );
 }
+

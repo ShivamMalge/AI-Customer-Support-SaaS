@@ -38,7 +38,8 @@ export default function ResetPasswordPage() {
       await apiClient.post('/auth/password-reset/request', data);
       setIsSubmitted(true);
       toast.success('Reset link sent!');
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: { message?: string } } } };
       toast.error(error.response?.data?.error?.message || 'Failed to request reset. Please try again.');
     } finally {
       setIsLoading(false);
@@ -53,7 +54,7 @@ export default function ResetPasswordPage() {
         </div>
         <CardTitle className="text-2xl font-bold tracking-tight">Reset password</CardTitle>
         <CardDescription className="text-muted-foreground">
-          Enter your email address and we'll send you a link to reset your password.
+          Enter your email address and we&apos;ll send you a link to reset your password.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -96,3 +97,4 @@ export default function ResetPasswordPage() {
     </Card>
   );
 }
+

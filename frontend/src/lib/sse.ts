@@ -1,6 +1,6 @@
 import { useAuthStore } from '@/stores/auth-store';
 
-export async function* fetchSSE(url: string, body: any) {
+export async function* fetchSSE(url: string, body: unknown) {
   const token = useAuthStore.getState().accessToken;
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
