@@ -65,7 +65,6 @@ services:
       FRONTEND_URL: "http://localhost:3000"
       JWT_ACCESS_EXPIRY: "15m"
       JWT_REFRESH_EXPIRY: "7d"
-      PRISMA_CLIENT_ENGINE_TYPE: "library"
     depends_on:
       postgres:
         condition: service_healthy
