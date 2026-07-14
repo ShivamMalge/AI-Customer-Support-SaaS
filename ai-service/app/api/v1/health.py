@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-router = APIRouter(tags=["health"])
-
 from sqlalchemy import text
 from app.core.database import get_db
+
+router = APIRouter(tags=["health"])
 
 @router.get("/health")
 async def health(db=Depends(get_db)):
