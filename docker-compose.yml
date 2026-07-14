@@ -1,0 +1,96 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: supportgpt-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: supportgpt
+      POSTGRES_PASSWORD: supportgpt_dev_password
+      POSTGRES_DB: supportgpt
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/docker/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U supportgpt"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: supportgpt-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: supportgpt-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: supportgpt
+      MINIO_ROOT_PASSWORD: supportgpt_dev_password
+    ports:
+      - "9001:9001"
+      - "9002:9000"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+
+  core-api:
+    build:
+      context: ./core-api
+    container_name: supportgpt-core-api
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      DATABASE_URL: "postgresql://supportgpt:supportgpt_dev_password@postgres:5432/supportgpt?schema=public"
+      REDIS_URL: "redis://redis:6379/0"
+      JWT_SECRET: "super-secret-key-for-jwt-signing"
+      AI_SERVICE_URL: "http://ai-service:8000"
+      FRONTEND_URL: "http://localhost:3000"
+      JWT_ACCESS_EXPIRY: "15m"
+      JWT_REFRESH_EXPIRY: "7d"
+      PRISMA_CLIENT_ENGINE_TYPE: "library"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  ai-service:
+    build:
+      context: ./ai-service
+    container_name: supportgpt-ai-service
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL_ASYNC: "postgresql+asyncpg://supportgpt:supportgpt_dev_password@postgres:5432/supportgpt"
+      REDIS_URL: "redis://redis:6379/0"
+      CORE_API_URL: "http://core-api:4000"
+      PORT: 8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:

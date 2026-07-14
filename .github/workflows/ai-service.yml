@@ -1,0 +1,65 @@
+name: AI Service CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ai-service/**'
+      - '.github/workflows/ai-service.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'ai-service/**'
+
+defaults:
+  run:
+    working-directory: ai-service
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: supportgpt_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Lint
+        run: uv run ruff check app/
+
+      - name: Type check
+        run: uv run mypy app/ --ignore-missing-imports
+
+      - name: Run tests
+        run: uv run pytest tests/ -v
+        env:
+          DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/supportgpt_test
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test-secret-key-for-ci
