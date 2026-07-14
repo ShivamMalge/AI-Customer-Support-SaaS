@@ -60,6 +60,8 @@ jobs:
       - name: Run tests
         run: uv run pytest tests/ -v
         env:
-          DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/supportgpt_test
+          DATABASE_URL_ASYNC: postgresql+asyncpg://test:test@localhost:5432/supportgpt_test
           REDIS_URL: redis://localhost:6379/0
           SECRET_KEY: test-secret-key-for-ci
+          CORE_API_URL: http://localhost:4000/api/v1
+          PORT: 8000
